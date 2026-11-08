@@ -1,0 +1,21 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# secrets
+.env
+
+# data: large and re-downloadable; the scripts are the source of truth
+data/raw/*
+data/processed/*
+data/rules/*
+!data/**/.gitkeep
+
+# os / editor
+.DS_Store
+.vscode/
+.idea/
