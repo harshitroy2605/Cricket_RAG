@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: dim_matches
+    description: "Match dimension. `competition` is the canonical name; `competition_raw` is as published."
+    columns:
+      - name: match_id
+        data_tests: [unique, not_null]
+
+  - name: dim_players
+    description: "One row per person in the Cricsheet register."
+    columns:
+      - name: player_id
+        data_tests: [unique, not_null]
+
+  - name: fct_deliveries
+    description: "Every ball with match/innings context and derived flags."
+    columns:
+      - name: match_id
+        data_tests:
+          - relationships: {arguments: {to: ref('dim_matches'), field: match_id}}
+
+  - name: fct_batting_innings
+    description: "One row per batter per innings, super overs excluded."
+    columns:
+      - name: player_id
+        data_tests: [not_null]
+      - name: batting_position
+        data_tests:
+          - accepted_values:
+              arguments: {values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], quote: false}
+              config: {severity: warn}   # concussion/impact subs can push past 11
+
+  - name: fct_bowling_innings
+    description: "One row per bowler per innings, super overs excluded. Metrics per ball."
+    columns:
+      - name: player_id
+        data_tests: [not_null]
+
+unit_tests:
+  - name: batting_counts_follow_cricket_rules
+    description: >
+      A wide is not a ball faced; a run four (non_boundary) is not a boundary;
+      a no-ball off which the batter hits 6 is a ball faced and a six.
+    model: fct_batting_innings
+    given:
+      - input: ref('fct_deliveries')
+        rows:
+          - {match_id: "m1", innings_no: 1, over_no: 0, ball_seq: 1, batter_id: "b1", batter: "Bat One", non_striker_id: "b2", runs_batter: 4, is_ball_faced: true, is_four: true, is_six: false, is_super_over: false}
+          - {match_id: "m1", innings_no: 1, over_no: 0, ball_seq: 2, batter_id: "b1", batter: "Bat One", non_striker_id: "b2", runs_batter: 0, is_ball_faced: false, is_four: false, is_six: false, is_super_over: false}
+          - {match_id: "m1", innings_no: 1, over_no: 0, ball_seq: 3, batter_id: "b1", batter: "Bat One", non_striker_id: "b2", runs_batter: 4, is_ball_faced: true, is_four: false, is_six: false, is_super_over: false}
+          - {match_id: "m1", innings_no: 1, over_no: 0, ball_seq: 4, batter_id: "b1", batter: "Bat One", non_striker_id: "b2", runs_batter: 6, is_ball_faced: true, is_four: false, is_six: true, is_super_over: false}
+      - input: ref('stg_wickets')
+        rows:   # a wicket in another match, so nobody here is out (dbt can't mock zero rows)
+          - {match_id: "m2", innings_no: 1, player_out_id: "x", kind: "bowled", is_dismissal: true, credited_to_bowler: true, bowler: "Y"}
+      - input: ref('stg_people')
+        rows:
+          - {person_id: "b2", name: "Bat Two"}
+      - input: ref('dim_matches')
+        rows:
+          - {match_id: "m1", format_family: "t20"}
+      - input: ref('stg_innings')
+        rows:
+          - {match_id: "m1", innings_no: 1, batting_team: "A", bowling_team: "B"}
+    expect:
+      rows:
+        # every expected row must list the same columns
+        - {player_id: "b1", player_name: "Bat One", batting_position: 1, runs: 14, balls_faced: 3, fours: 1, sixes: 1, is_out: false}
+        - {player_id: "b2", player_name: "Bat Two", batting_position: 2, runs: 0, balls_faced: 0, fours: 0, sixes: 0, is_out: false}

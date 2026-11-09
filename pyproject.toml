@@ -8,6 +8,7 @@ license = { text = "MIT" }
 # Phase 0 keeps runtime deps minimal on purpose.
 # Each phase adds only what it needs, and its doc explains why.
 dependencies = [
+    "duckdb>=2.0.0",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
 ]
@@ -17,6 +18,13 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.5",
 ]
+pipeline = [
+    "dbt-duckdb>=1.11.1",
+]
+
+[tool.uv]
+# `uv sync` installs these groups by default. The Docker runtime image will use --no-default-groups.
+default-groups = ["dev", "pipeline"]
 
 [build-system]
 requires = ["hatchling"]

@@ -1,0 +1,15 @@
+kind,credited_to_bowler,is_dismissal
+bowled,true,true
+caught,true,true
+caught and bowled,true,true
+lbw,true,true
+stumped,true,true
+hit wicket,true,true
+run out,false,true
+obstructing the field,false,true
+handled the ball,false,true
+timed out,false,true
+hit the ball twice,false,true
+retired out,false,true
+retired hurt,false,false
+retired not out,false,false

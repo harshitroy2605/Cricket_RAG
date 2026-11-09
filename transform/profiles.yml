@@ -1,0 +1,12 @@
+third_umpire:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('TU_DUCKDB_PATH', '../data/processed/cricket.duckdb') }}"
+      threads: "{{ env_var('TU_DBT_THREADS', '2') | int }}"
+      settings:
+        # DuckDB spills big joins/sorts to disk once it reaches this limit.
+        # Keep it well below physical RAM (OS, editor and dbt itself need memory too).
+        memory_limit: "{{ env_var('TU_DUCKDB_MEMORY_LIMIT', '4GB') }}"
+        preserve_insertion_order: false   # lets DuckDB stream large unnests with less memory

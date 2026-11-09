@@ -1,0 +1,29 @@
+name: third_umpire
+version: "1.0.0"
+profile: third_umpire
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Folder holding all_json/ and people.csv. Relative to transform/ (where dbt runs).
+  raw_dir: "../data/raw"
+
+models:
+  third_umpire:
+    bronze:
+      +schema: bronze
+      +materialized: table
+    silver:
+      +schema: silver
+      +materialized: table
+    gold:
+      +schema: gold
+      +materialized: table
+
+seeds:
+  third_umpire:
+    +schema: reference

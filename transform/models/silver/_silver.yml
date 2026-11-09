@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: stg_matches
+    description: "One typed row per match."
+    columns:
+      - name: match_id
+        data_tests: [unique, not_null]
+      - name: match_type
+        data_tests:
+          - not_null
+          - relationships: {arguments: {to: ref('match_types'), field: match_type}}
+      - name: gender
+        data_tests:
+          - accepted_values: {arguments: {values: ['male', 'female']}}
+      - name: team_type
+        data_tests:
+          - accepted_values: {arguments: {values: ['club', 'international']}}
+      - name: result
+        description: "win | draw | tie | no result"
+        data_tests:
+          - not_null
+          - accepted_values: {arguments: {values: ['win', 'draw', 'tie', 'no result']}}
+      - name: start_date
+        data_tests: [not_null]
+      - name: balls_per_over
+        data_tests:
+          - accepted_values: {arguments: {values: [5, 6], quote: false}}
+
+  - name: stg_registry
+    description: "Per-match mapping from person name to Cricsheet person id."
+    columns:
+      - name: person_id
+        data_tests: [not_null]
+
+  - name: stg_match_players
+    description: "Playing XI per team per match."
+    columns:
+      - name: player_id
+        data_tests: [not_null]
+      - name: match_id
+        data_tests:
+          - relationships: {arguments: {to: ref('stg_matches'), field: match_id}}
+
+  - name: stg_innings
+    description: "One row per innings, numbered in batting order."
+    columns:
+      - name: match_id
+        data_tests:
+          - not_null
+          - relationships: {arguments: {to: ref('stg_matches'), field: match_id}}
+
+  - name: stg_deliveries
+    description: "One row per ball. Grain: match_id, innings_no, over_no, ball_seq."
+    columns:
+      - name: batter_id
+        data_tests: [not_null]
+      - name: bowler_id
+        data_tests: [not_null]
+      - name: match_id
+        data_tests:
+          - relationships: {arguments: {to: ref('stg_matches'), field: match_id}}
+
+  - name: stg_wickets
+    description: "One row per dismissal record."
+    columns:
+      - name: kind
+        description: "Must exist in the wicket_kinds seed, so a new kind fails the build instead of being miscounted."
+        data_tests:
+          - not_null
+          - relationships: {arguments: {to: ref('wicket_kinds'), field: kind}}
+      - name: player_out
+        data_tests: [not_null]
+
+  - name: stg_people
+    columns:
+      - name: person_id
+        data_tests: [unique, not_null]

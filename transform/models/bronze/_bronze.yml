@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: bronze_matches
+    description: "One row per Cricsheet match file (data_version 1.3.0), parsed against the schema in macros/cricsheet_schema.sql."
+    columns:
+      - name: match_id
+        description: "Cricsheet match id, taken from the file name."
+        data_tests: [unique, not_null]
+      - name: info
+        description: "Match metadata (teams, dates, outcome, registry, ...)."
+        data_tests: [not_null]
+      - name: innings
+        description: "List of innings, each with overs and deliveries."
+
+  - name: bronze_people
+    description: "Cricsheet people register (one row per person), all columns as text."
+    columns:
+      - name: identifier
+        data_tests: [unique, not_null]

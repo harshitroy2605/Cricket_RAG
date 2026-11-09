@@ -1,0 +1,7 @@
+match_type,format_family,description
+Test,multi_day,Test match (international)
+MDM,multi_day,Multi-day match (first-class or other non-Test)
+ODI,one_day,One Day International
+ODM,one_day,One-day match (non-ODI)
+T20,t20,Twenty20 (incl. T20 internationals and leagues)
+IT20,t20,International Twenty20 not classed as T20I
